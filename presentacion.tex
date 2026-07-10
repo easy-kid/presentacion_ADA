@@ -1,0 +1,225 @@
+\documentclass[aspectratio=169]{beamer}
+\input{Macros}
+
+% datos de la presentacion
+\def\titulo{Ramificación y Poda}
+\def\subtitulo{Técnicas de Optimización Combinatoria}
+\def\autora{Vicente Navarro}
+\def\correoa{vicentemartin.navarro@alumnos.ulagos.cl}
+\def\autorb{Cristopher Venegas}
+\def\correob{cristophervenegas.@alumnos.ulagos.cl}
+\def\autorc{}
+\def\correoc{}
+\def\asignatura{Análisis y Diseño de Algoritmos}
+\def\campus{Puerto Montt}
+\def\carrera{Ingeniería Civil en Informática}
+
+\lstset{language=C}
+
+% configuracion del autor
+\author[V. Navarro, C. Venegas]{
+	\href{mailto:\correoa}{\autora}\\
+	\href{mailto:\correob}{\autorb}}
+
+\begin{document}
+
+% pagina de portada
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+\setbeamertemplate{background}{}
+
+% indice inicial
+\section[Contenido]{}
+\begin{frame}
+    \frametitle{\textbf{Contenido}}
+    \setcounter{tocdepth}{1}
+    \scriptsize
+    \tableofcontents[]
+\end{frame}
+
+% transiciones al inicio de cada seccion
+\AtBeginSection[]{
+\begin{frame}
+    \frametitle{\textbf{Contenido}}
+    \scriptsize
+    \tableofcontents[currentsection]
+\end{frame}}
+
+% seccion 1 origen de la tecnica
+\section{Origen de la Técnica}
+
+\begin{frame}[fragile]
+    \frametitle{Origen de la Técnica}
+    \justifying
+    \textbf{Ramificación y Poda (Branch and Bound)} es una técnica algorítmica fundamental diseñada para resolver problemas complejos de optimización combinatoria.
+    
+    \begin{block}{Historia y Propuesta}
+        Fue propuesta inicialmente en \textbf{1960} por las matemáticas \textbf{A.H. Land y A.G. Doig} como un método para resolver problemas de programación entera.
+    \end{block}
+    
+    \begin{block}{Metodología General}
+        El método explora de manera sistemática el espacio de soluciones mediante la construcción de un \textbf{árbol de búsqueda}. A medida que progresa, descarta (poda) aquellas ramas que se demuestra matemáticamente que no pueden mejorar la mejor solución obtenida hasta el momento, reduciendo drásticamente el tiempo de ejecución.
+    \end{block}
+    
+    \vspace{0.2cm}
+    \begin{center}
+        \rojo{\textbf{Optimización Combinatoria}} \quad $\bullet$ \quad \azul{\textbf{Exploración del Espacio de Soluciones}}
+    \end{center}
+\end{frame}
+
+% exponentes
+\begin{frame}[fragile]
+    \frametitle{Principales Exponentes}
+    \justifying
+    
+    \begin{minipage}[t]{0.48\textwidth}
+        \begin{block}{A.H. Land y A.G. Doig}
+            \scriptsize
+            Creadores del método \emph{Branch and Bound} en \textbf{1960}. Publicaron la técnica para resolver problemas de programación entera, sentando las bases teóricas de la optimización combinatoria moderna.
+        \end{block}
+        
+        \begin{block}{Egon Balas}
+            \scriptsize
+            Desarrolló el \textbf{algoritmo aditivo (1965)} para programación binaria, una variante especializada de B\&B. Realizó amplias contribuciones a la teoría de planos de corte y optimización discreta.
+        \end{block}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \begin{block}{John D.C. Little}
+            \scriptsize
+            En \textbf{1963} aplicó de forma exitosa \emph{Branch and Bound} al Problema del Viajante (TSP), demostrando la gran eficacia práctica del método utilizando cotas inferiores basadas en reducción de matrices de costos.
+        \end{block}
+        
+        \begin{block}{Otros Contribuyentes}
+            \scriptsize
+            Investigadores como \textbf{Lawler, Wood, Narendra y Fukunaga} extendieron la técnica a problemas de asignación de recursos, el problema de la mochila (\emph{knapsack}) y reconocimiento de patrones.
+        \end{block}
+    \end{minipage}
+\end{frame}
+
+% seccion 2 conceptos fundamentales
+\section{Conceptos Fundamentales}
+
+\begin{frame}[fragile]
+    \frametitle{Conceptos Fundamentales de B\&B}
+    \justifying
+    El funcionamiento de Ramificación y Poda se sostiene sobre tres componentes principales que guían la búsqueda de la solución óptima:
+    
+    \begin{description}
+        \item[\azul{Ramificación (Branching)}] Consiste en dividir el problema original en subproblemas más pequeños y disjuntos. Visualmente, esto genera una estructura de \textbf{árbol de búsqueda} donde cada nodo representa un subproblema o estado parcial.
+        
+        \item[\verde{Acotación (Bounding)}] Se define una función para calcular cotas (límites óptimos teóricos, como cotas inferiores para minimización) en cada nodo. Permite estimar la calidad de las soluciones que contiene una rama sin necesidad de explorar sus hojas.
+        
+        \item[\rojo{Poda (Pruning)}] Proceso crítico que descarta ramas completas del árbol de búsqueda. Si la cota de un nodo hijo es peor que la de la mejor solución factible ya encontrada (\emph{solución incumbente}), se garantiza que esa rama no contiene el óptimo global y se elimina.
+    \end{description}
+\end{frame}
+
+% seccion 3 implementacion
+\section{Implementación del Algoritmo}
+
+\begin{frame}[fragile]
+    \frametitle{Implementación y Pseudocódigo}
+    \justifying
+    
+    \begin{minipage}[t]{0.52\textwidth}
+        \begin{block}{Esquema de Branch \& Bound}
+            \scriptsize
+            \begin{lstlisting}[language=C]
+funcion BranchAndBound(nodo):
+    Si es_hoja(nodo):
+        Actualizar mejor_solucion
+        Retornar
+    
+    Para cada hijo en expandir(nodo):
+        cota = calcular_cota_inferior(hijo)
+        Si cota < mejor_solucion:
+            BranchAndBound(hijo) // ramificar
+        Sino:
+            Descartar(hijo)      // podar
+            
+    Retornar mejor_solucion
+            \end{lstlisting}
+        \end{block}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.44\textwidth}
+        \begin{block}{Puntos Clave del Control}
+            \small
+            \begin{itemize}
+                \item \textbf{Estrategia de Selección}: Determina qué nodo expandir primero. Las más comunes son Búsqueda en Profundidad (DFS), Búsqueda en Anchura (BFS) y Búsqueda por el Mejor Primero (Best-First).
+                \item \textbf{Actualización de Cota}: La variable global de mejor solución actúa como barrera de poda para el resto de las ramas del árbol.
+            \end{itemize}
+        \end{block}
+    \end{minipage}
+\end{frame}
+
+% seccion 4 complejidad
+\section{Análisis de Complejidad}
+
+\begin{frame}[fragile]
+    \frametitle{Complejidad del Algoritmo}
+    \justifying
+    
+    \begin{columns}[t]
+        \begin{column}{0.32\textwidth}
+            \begin{alertblock}{Peor Caso: $O(b^d)$}
+                \scriptsize
+                En el peor de los escenarios (cuando la función de acotación es débil o ineficaz), el algoritmo no realiza ninguna poda y se ve obligado a explorar todos los nodos del árbol, comportándose como una búsqueda por fuerza bruta ($b$ es el factor de ramificación y $d$ es la profundidad).
+            \end{alertblock}
+        \end{column}
+        \hfill
+        \begin{column}{0.32\textwidth}
+            \begin{block}{Complejidad Espacial}
+                \scriptsize
+                Depende críticamente del orden de exploración de los nodos en memoria:
+                \begin{itemize}
+                    \item \textbf{DFS}: $O(b \times d)$, requiere memoria lineal respecto a la altura del árbol.
+                    \item \textbf{Best-First}: $O(b^d)$, puede requerir almacenar todos los nodos generados en una cola de prioridad antes de expandirlos.
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \hfill
+        \begin{column}{0.32\textwidth}
+            \begin{exampleblock}{Eficiencia de la Poda}
+                \scriptsize
+                La precisión de la función de cota es fundamental. Una cota muy ajustada podará gran cantidad de ramas, pero su cálculo en cada nodo puede ser costoso. Existe un balance de diseño clave entre el costo de calcular la cota y la efectividad de la poda.
+            \end{exampleblock}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% seccion 5 autoevaluacion
+\section{Autoevaluación}
+
+\begin{frame}
+    \frametitle{Autoevaluación del Grupo}
+    \justifying
+    \vspace{0.5cm}
+    \begin{itemize}
+        \item \textbf{Aprendizaje Obtenido}
+        \vspace{0.3cm}
+        \item \textbf{Desafíos Encontrados}
+        \vspace{0.3cm}
+        \item \textbf{Valor Práctico de B\&B}
+        \vspace{0.3cm}
+        \item \textbf{Trabajo en Equipo}
+    \end{itemize}
+\end{frame}
+
+% cierre
+\section{Cierre}
+
+\begin{frame}[plain]
+    \centering
+    \vspace{2.5cm}
+    \Huge \azul{\textbf{Muchas Gracias}}
+    
+    \vspace{1cm}
+    \large \negro{Análisis y Diseño de Algoritmos}
+    
+    \vspace{1.5cm}
+    \scriptsize \gris{Departamento de Ciencias de La Ingeniería $\bullet$ Universidad de Los Lagos}
+\end{frame}
+
+\end{document}
